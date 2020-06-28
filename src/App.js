@@ -111,18 +111,18 @@ function App() {
   function convertToTensor(e) {
     e.preventDefault();
     let output = [...data];
-    console.log('here is our data', output);
+    // console.log('here is our data', output);
 
     // goals of this function are..
     //     convert data to tensor.
     //     shuffle data. remember that normally the first item is 130/18
     return tf.tidy(() => {
       tf.util.shuffle(output);
-      console.log('did we just shuffle data??', output);
+      // console.log('did we just shuffle data??', output);
       // convert data to tensor.
       const inputs = output.map(d => d.x);
       const labels = output.map(d => d.y);
-      console.log('here are some inputs and labels', inputs, labels);
+      // console.log('here are some inputs and labels', inputs, labels);
 
       const inputTensor = tf.tensor2d(inputs, [inputs.length, 1]);
       const labelTensor = tf.tensor2d(labels, [labels.length, 1]);
@@ -149,35 +149,33 @@ function App() {
 
   async function handleTrainModel(e) {
     e.preventDefault();
-    const { inputs, labels } = data;
-    console.log('here are some inputs, ', inputs, labels);
-    async function trainModel(model, inputs, labels ) {
-      model.compile({
-        optimizer: tf.train.adam(),
-        loss: tf.losses.meanSquaredError,
-        metrics: ['mse']
-      });
+    console.log('inside handleTrainModel()...');
+    const {inputs, labels} = data;
+    async function trainModel(model, inputs, labels) {
+        // Prepare the model for training.
+        model.compile({
+          optimizer: tf.train.adam(),
+          loss: tf.losses.meanSquaredError,
+          metrics: ['mse'],
+        });
 
-      const batchSize = 32;
-      const epochs = 50;
+        const batchSize = 32;
+        const epochs = 50;
 
-      return await model.fit(inputs, labels, {
-        batchSize,
-        epochs,
-        shuffle: true,
-        callbacks: tfvis.show.fitCallbacks(
-          {name: 'training perf'},
-          ['loss', 'mse'],
-          {height: 200, callbacks: ['onEpochEnd']}
-        )
-      });
+        return await model.fit(inputs, labels, {
+          batchSize,
+          epochs,
+          shuffle: true,
+          callbacks: tfvis.show.fitCallbacks(
+            { name: 'Training Performance' },
+            ['loss', 'mse'],
+            { height: 200, callbacks: ['onEpochEnd'] }
+          )
+        });
     }
 
-
-
-    await trainModel(model, inputs, labels)
-    console.log('training is done');
-
+    await trainModel(model, inputs, labels);
+    console.log('done training');
   }
 
   return (
